@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FLOZY — UNBROKEN</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div id="loader"><small data-ui="presents"></small><b>FLOZY</b>
+    <div class="crack"></div>
+    <div class="bar"><i></i></div>
+  </div>
+  <header>
+    <a class="logo" href="#s0" data-go="0">FLOZY</a>
+    <div class="search">
+      <form id="sf" role="search"><input id="q" autocomplete="off" aria-label="Search" data-ph="ph"><button
+          type="submit" aria-label="Search">&#8981;</button></form>
+      <ul id="sug"></ul>
+    </div>
+    <button class="btn" id="lang" aria-label="Language">RU / EN</button>
+    <div id="player">
+      <button class="btn" id="play" aria-label="Music">&#9654;</button>
+      <input id="vol" type="range" min="0" max="1" step=".05" value=".4" aria-label="Volume">
+    </div>
+    <button class="btn" id="menu" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <div id="prog"></div>
+  </header>
+  <nav id="nav" aria-label="Sections"></nav>
+  <main id="main"></main>
+  <button class="btn" id="top" aria-label="Top">&uarr;</button>
+  <div id="toast" role="status"></div>
+  <!-- MUSIC: put your royalty-free/own track at audio/background-music.mp3 -->
+  <audio id="au" src="audio/background-music.mp3" loop preload="none"></audio>
+
+  <script>
+    /* ===== LINKS: replace the placeholders with real URLs ===== */
+    const LINKS = { telegram: "https://t.me/flozka1337⁠", youtube: "https://www.youtube.com/@flozka⁠", instagram: "сори пока нуту", tiktok: "https://www.tiktok.com/@flozzy1337?_r=1&_t=ZN-9BGJ2j2lzs6", facebook: "сори пока нуту", x: "сори пока нуту", twitch: "сори пока нуту", discord: "https://discord.com/users/⁠" };
+
+    /* ===== TRANSLATIONS: edit texts here =====
+     sections: [hashtags, image file in images/, link key, stat, {ru:[title,paragraphs,quote], en:[...]}] */
+    const UI = {
+      ru: { presents: "FLOZY — UNBROKEN ПРЕДСТАВЛЯЕТ", ph: "#хештег, например #НАЧАЛО", back: "← Назад", next: "Дальше: ", notfound: "Раздел не найден. Попробуй: ", found: "Переход: ", open: "Открыть", nolink: "Ссылка ещё не добавлена", start: "Начать историю", tag1: "История пути, который не закончился на первых трудностях", tag2: "От первых шагов до собственных достижений", end: "Это ещё не конец истории.", toTop: "Наверх", finish: "Социальные сети →", img: "Место для твоего фото: images/" },
+      en: { presents: "FLOZY — UNBROKEN PRESENTS", ph: "#hashtag, e.g. #START", back: "← Back", next: "Next: ", notfound: "Section not found. Try: ", found: "Going to: ", open: "Open", nolink: "Link not added yet", start: "Begin the story", tag1: "The story of a path that did not end at the first hardships", tag2: "From first steps to my own achievements", end: "This is not the end of the story.", toTop: "Top", finish: "Social links →", img: "Place for your photo: images/" }
+    };
+    const S = [
+      [["ГЛАВНАЯ", "HOME"], "home.jpg", 0, 0, { ru: ["Главная"], en: ["Home"] }],
+      [["НАЧАЛО", "START", "BEGINNING"], "start.jpg", 0, 0, { ru: ["Начало истории", ["За любым результатом стоит начало, которое редко выглядит впечатляюще. Я не получил аудиторию, известность или игровые результаты сразу — всё это не приходит за один день.", "Всё начиналось с интереса к созданию контента и желания попробовать что-то новое. Первые шаги были неуверенными, но именно они открыли дорогу дальше."], "Начало не обязано быть красивым."], en: ["The Beginning", ["Behind every result there is a start that rarely looks impressive. I did not get an audience, recognition or game results at once — none of it comes in a day.", "It began with an interest in creating content and a wish to try something new. The first steps were unsure, but they opened the road ahead."], "A beginning does not have to be beautiful."] }],
+      [["ПЕРВЫЕШАГИ", "FIRSTSTEPS", "MEDIA"], "media.jpg", 0, 0, { ru: ["Первые шаги в медиа", ["Создавать контент оказалось по-настоящему интересно. Интерес к медиа формировался постепенно: я пробовал, ошибался и учился делать материалы лучше.", "Первые результаты не всегда совпадали с ожиданиями. Но с каждым проектом появлялось больше опыта, и именно поэтому важно продолжать работать."]], en: ["First Steps in Media", ["Creating content turned out to be truly interesting. My interest in media grew gradually: I tried, made mistakes and learned to make better material.", "The first results did not always match my expectations. But every project brought more experience, which is why it matters to keep working."]] }],
+      [["YOUTUBE"], "youtube.jpg", "youtube", "4 000+", { ru: ["YouTube", ["YouTube — большая часть моей истории. Это постоянная работа над каналом, над идеями, качеством видео и развитием аудитории.", "Для меня важен каждый подписчик: за ним стоит человек, которому интересно то, что я делаю. Делать видео непросто, нужно постоянно учиться и хотеть становиться лучше."], "4 000+ ПОДПИСЧИКОВ"], en: ["YouTube", ["YouTube is a big part of my story. It is constant work on the channel, ideas, video quality and growing an audience.", "Every subscriber matters to me: behind each one is a person who is interested in what I do. Making videos is not easy — you must keep learning and keep wanting to improve."], "4,000+ SUBSCRIBERS"] }],
+      [["TIKTOK"], "tiktok.jpg", "tiktok", "300+", { ru: ["TikTok", ["В TikTok я делаю короткие ролики, публикую контент, общаюсь с аудиторией и ищу интересные идеи. Качество приходится улучшать постоянно.", "300+ подписчиков — это не огромная аудитория, но это реальный результат. Любое число — часть общего пути."], "300+ ПОДПИСЧИКОВ"], en: ["TikTok", ["On TikTok I make short videos, publish content, talk with the audience and look for interesting ideas. Quality has to be improved all the time.", "300+ followers is not a huge audience, but it is a real result. Every number is part of the same path."], "300+ FOLLOWERS"] }],
+      [["TWITCH"], "twitch.jpg", "twitch", 0, { ru: ["Twitch", ["Twitch — это прямые трансляции и живое общение со зрителями. Здесь важна игровая атмосфера и возможность собирать собственное сообщество.", "Стримы развивают навыки общения и учат постоянству: приходить снова, даже когда всё идёт не идеально."]], en: ["Twitch", ["Twitch means live streams and real-time talks with viewers. The gaming atmosphere and the chance to build your own community matter here.", "Streaming develops communication skills and teaches consistency: coming back even when things are not perfect."]] }],
+      [["BRAWLSTARS", "BRAWL"], "brawlstars.jpg", 0, "100 000+", { ru: ["Brawl Stars", ["Мой игровой путь — это долгая игра и постепенное развитие. Более 100 000 трофеев на основном аккаунте появились не сами по себе.", "За красивым числом стоят многие часы игры, терпение, поражения и работа над навыками. Время и усилия — вот из чего оно сделано."], "100 000+ TROPHIES"], en: ["Brawl Stars", ["My game path is long play and gradual growth. More than 100,000 trophies on my main account did not appear by themselves.", "Behind the number are many hours of play, patience, defeats and work on skills. Time and effort are what it is made of."], "100,000+ TROPHIES"] }],
+      [["DISCORD"], "discord.jpg", "discord", 0, { ru: ["Discord", ["Discord — моё сообщество, где люди общаются, обсуждают контент и игры и находят единомышленников.", "Важны люди, которые поддерживают друг друга. Именно они делают сообщество живым."]], en: ["Discord", ["Discord is my community, where people chat, discuss content and games, and find like-minded people.", "What matters are people who support each other. They make a community alive."]] }],
+      [["ТРУДНОСТИ", "STRUGGLES", "HARDSHIPS"], "struggles.jpg", 0, 0, { ru: ["Трудности и препятствия", ["Развитие не всегда идёт по плану. Не каждый день приносит результат, бывают неудачи, усталость и сложно сохранять мотивацию. Не всегда окружающие понимают твои старания.", "Большие цели требуют времени, а планы иногда приходится пересматривать. Ошибки становятся опытом. Усталость — не поражение, а пауза — не конец пути.", "Постоянное переутомление не геройство. Отдых, восстановление и забота о себе тоже важны."]], en: ["Struggles and Obstacles", ["Growth does not always go to plan. Not every day brings results; there are failures, tiredness, and it is hard to keep motivation. Not everyone understands your effort.", "Big goals take time, and plans sometimes need rethinking. Mistakes become experience. Tiredness is not defeat, and a pause is not the end of the road.", "Constant exhaustion is not heroic. Rest, recovery and taking care of yourself matter too."]] }],
+      [["ПЕРЕЛОМНЫЙМОМЕНТ", "TURNINGPOINT"], "turning.jpg", 0, 0, { ru: ["Переломный момент", ["Постепенно я понял: важен не только итог, но и сам процесс развития. Трудности меняют взгляд на собственные возможности.", "Через трещину пробивается свет — не потому, что всё разрушено, а потому, что есть куда расти."], "Свет входит там, где трещина."], en: ["The Turning Point", ["Gradually I understood: not only the outcome matters, but the process of growing itself. Hardships change how you see your own abilities.", "Light comes through a crack — not because everything is ruined, but because there is room to grow."], "Light enters where the crack is."] }],
+      [["UNBROKEN"], "unbroken.jpg", 0, 0, { ru: ["UNBROKEN", ["Быть UNBROKEN — не значит никогда не сталкиваться с трудностями. Это значит не позволять им окончательно определить твоё будущее.", "Это постоянное развитие, работа над собой, терпение, ошибки и новые возможности. И желание двигаться вперёд."], "МОЙ ПУТЬ ЕЩЁ НЕ ЗАКОНЧЕН"], en: ["UNBROKEN", ["To be UNBROKEN does not mean never facing hardship. It means not letting it finally define your future.", "It is constant growth, work on yourself, patience, mistakes and new opportunities. And the wish to keep moving forward."], "MY JOURNEY IS NOT OVER"] }],
+      [["БУДУЩЕЕ", "FUTURE"], "future.jpg", 0, 0, { ru: ["Будущее и новые цели", ["Текущие достижения — не конечная точка. Я хочу развивать соцсети, делать более качественный контент, улучшать навыки и развивать сообщество.", "Впереди новые цели и новый опыт. История продолжается."]], en: ["Future and New Goals", ["Current achievements are not the end point. I want to grow my social networks, make better content, improve my skills and develop the community.", "New goals and new experience are ahead. The story goes on."]] }],
+      [["КОНТАКТЫ", "CONTACTS", "SOCIAL"], "contacts.jpg", 0, 0, { ru: ["Социальные сети"], en: ["Social Links"] }]
+    ];
+
+    /* ===== EXTRA PARAGRAPHS (appended to each section; edit freely) ===== */
+    const EXTRA = {
+      1: { ru: ["Сегодня я понимаю: если бы я ждал идеального момента, я бы так и не начал. Начать — значит согласиться на несовершенство и всё равно сделать шаг."], en: ["Today I understand: if I had waited for the perfect moment, I would never have started. To begin is to accept imperfection and still take the step."] },
+      2: { ru: ["Я учился на практике: что-то пробовал, смотрел на результат и делал выводы. Не каждая идея работала, но каждая давала понимание, куда двигаться дальше.", "Со временем я заметил главное: качество растёт не от одного удачного дня, а от регулярной работы и желания разбираться в деталях."], en: ["I learned by doing: I tried things, looked at the result and drew conclusions. Not every idea worked, but each one showed me where to go next.", "Over time I noticed the main thing: quality grows not from one lucky day, but from regular work and the wish to understand the details."] },
+      3: { ru: ["Канал для меня — это не только цифры. Это место, где я пробую новые форматы, исправляю ошибки прошлых видео и стараюсь, чтобы следующий ролик был лучше предыдущего."], en: ["For me the channel is not only numbers. It is a place where I try new formats, fix the mistakes of earlier videos and try to make the next one better than the last."] },
+      4: { ru: ["Короткие видео учат быстро формулировать мысль и удерживать внимание. Это другой язык, и осваивать его интересно."], en: ["Short videos teach you to state an idea quickly and hold attention. It is a different language, and learning it is interesting."] },
+      5: { ru: ["В эфире нельзя ничего переделать — всё происходит сразу. Это учит быть собой и спокойно относиться к ошибкам."], en: ["On a live stream nothing can be redone — everything happens at once. It teaches you to be yourself and to treat mistakes calmly."] },
+      6: { ru: ["Игра научила меня системности: разбирать поражения, замечать повторяющиеся ошибки и возвращаться к тому, что не получилось.", "Трофеи — это итог, а не цель сама по себе. Главное, что стоит за ними, — привычка не бросать и терпеливо улучшать себя."], en: ["The game taught me to be systematic: to review defeats, notice repeating mistakes and return to what did not work.", "Trophies are a result, not a goal in themselves. What really stands behind them is the habit of not quitting and patiently improving."] },
+      7: { ru: ["Я хочу, чтобы в сообществе каждый чувствовал себя своим: можно обсуждать игры, делиться идеями и просто общаться."], en: ["I want everyone in the community to feel at home: you can discuss games, share ideas or simply talk."] },
+      8: { ru: ["Я не хочу делать вид, что всё было гладко. Были периоды, когда сил не хватало, и именно честность с самим собой помогала понять, что мне нужно: пауза, смена темпа или другой подход."], en: ["I do not want to pretend it was all smooth. There were times when I had no strength left, and honesty with myself helped me see what I needed: a pause, a different pace or another approach."] },
+      9: { ru: ["С этого момента я стал по-другому смотреть на цифры. Они показывают результат, но не показывают путь — а путь и есть то, что меняет человека."], en: ["From that point I looked at numbers differently. They show the result but not the road — and the road is what changes a person."] },
+      10: { ru: ["Я могу ошибаться, уставать и менять планы. Но решение продолжать — всегда моё. Именно в этом для меня и заключается смысл слова UNBROKEN."], en: ["I may make mistakes, get tired and change plans. But the decision to continue is always mine. That, for me, is the meaning of the word UNBROKEN."] },
+      11: { ru: ["Я не буду давать обещаний, которые не уверен выполнить. Зато могу сказать честно: я продолжу работать, учиться и делиться этим путём с теми, кто рядом."], en: ["I will not make promises I am not sure to keep. But I can say honestly: I will keep working, learning and sharing this path with those who are with me."] }
+    };
+    for (const i in EXTRA) for (const l of ["ru", "en"]) S[i][4][l][1].push(...EXTRA[i][l]);
+
+    /* ===== LONG TEXTS (RU). Add the same keys with "en" to translate ===== */
+    const LONG = {
+      6: { ru: ["Когда видишь число 100 000+, легко подумать, что за ним стоит одна большая победа. На самом деле его собирали маленькие шаги: один матч, потом ещё один, потом ещё сотни.", "Были дни, когда всё получалось. Были дни, когда трофеи уходили быстрее, чем приходили. Сначала такие серии злили, потом я научился относиться к ним как к информации о том, что нужно поправить.", "Я понял, что рост в игре редко бывает прямой. Он похож на лестницу с неровными ступенями: иногда поднимаешься, иногда стоишь на месте, иногда спускаешься на пару ступеней.", "Самое трудное в долгой игре — не умение, а терпение. Нужно снова и снова заходить в матч, даже когда не хочется, и не требовать от себя идеального результата каждый раз.", "Поражения научили меня больше, чем победы. После победы редко спрашиваешь себя, что можно улучшить, а после поражения этот вопрос приходит сам.", "Я старался разбирать свои ошибки спокойно: где поторопился, где неверно оценил ситуацию, где просто не хватило опыта. Так ошибка превращается из причины злиться в урок.", "Важно и то, что игра не должна заменять собой всё остальное. Отдых, перерывы и интересы вне экрана помогают играть лучше и не выгорать.", "Эти трофеи — не доказательство для кого-то другого. Это моё личное напоминание о том, что время и усилия действительно складываются в результат.", "Я не считаю этот результат вершиной. Он показывает, сколько всего можно пройти, если не бросать, и подсказывает, что впереди может быть ещё больше."] },
+      8: { ru: ["Я долго думал, как написать об этом честно, потому что трудности легко приукрасить. Мне не хочется делать вид, что путь был гладким и красивым.", "Есть дни, когда делаешь всё правильно, а результата не видно. Видео выходит, а отклика мало. Играешь много, а прогресса почти нет. В такие моменты начинаешь сомневаться: а нужно ли это всё?", "Усталость приходит не сразу. Сначала просто хочется отложить дело на завтра, потом становится трудно начинать, и вот уже то, что раньше радовало, превращается в обязанность.", "Я понял, что это нормально и что это не слабость. Выгорание — сигнал о том, что нагрузка была слишком долгой без отдыха.", "Раньше мне казалось, что остановка означает проигрыш. Сейчас я думаю иначе: пауза нужна, чтобы вернуться с силами, а не чтобы сдаться.", "Не все вокруг понимают, зачем тратить столько времени на контент и игру. Иногда это звучит обидно, и приходится самому напоминать себе, зачем ты этим занимаешься.", "Я учусь не сравнивать свой путь с чужим. У каждого свой темп, свои обстоятельства и своя точка старта, и чужой результат ничего не говорит о моём.", "Планы тоже иногда ломаются. Приходится менять формат, сроки и ожидания, и это не провал, а часть взросления в любом деле.", "Мне помогает разбивать большую цель на маленькие шаги. Когда задача кажется огромной, я делаю только ближайшее действие, и этого достаточно, чтобы сдвинуться с места.", "И главное: заботиться о себе — это не слабость и не лень. Сон, отдых и спокойствие дают силы продолжать, поэтому я ставлю их в один ряд с работой."] },
+      10: { ru: ["Слово UNBROKEN легко принять за обещание никогда не падать. Для меня оно значит почти противоположное: я признаю, что падал и буду спотыкаться, но не позволяю этому решать, кем я стану.", "Сломаться можно по-разному: от неудачи, от усталости, от чужих слов, от собственных сомнений. Все эти силы реальны, и я не делаю вид, что их нет.", "Но между трудностью и тем, что со мной будет дальше, всегда остаётся выбор. Он не громкий и не героический. Иногда это просто решение открыть проект и сделать один маленький шаг.", "UNBROKEN для меня — это привычка возвращаться. Возвращаться к видео, к игре, к сообществу и к самому себе, даже после паузы и после сомнений.", "Это работа над собой без жестокости к себе. Я хочу становиться лучше, но не за счёт того, чтобы ругать себя за каждую ошибку.", "Это терпение к результатам. Подписчики, трофеи и цифры приходят медленнее, чем хочется, но они приходят тогда, когда ты продолжаешь.", "Это готовность признавать ошибки и делать из них выводы. Каждая неудача показывает, что нужно изменить в подходе.", "Это внимание к новым возможностям. Иногда лучший шаг — попробовать новый формат или площадку, а не повторять одно и то же.", "Я не знаю точно, что будет дальше, и не буду делать вид, что знаю. Но я знаю, в какую сторону хочу двигаться.", "Если ты читаешь это и тоже проходишь через трудный период, помни: пауза не отменяет пройденного. Твой путь принадлежит тебе, и только ты решаешь, продолжать ли его."] }
+    };
+    for (const i in LONG) S[i][4].ru[1].push(...LONG[i].ru);
+    S.splice(9, 0, [["TELEGRAM", "ТЕЛЕГРАМ", "ТГ", "TG"], "telegram.jpg", "telegram", "400+", {
+      ru: ["Telegram", ["У меня есть свой Telegram-канал, и это ещё одна часть моей истории. Здесь я могу общаться с аудиторией ближе и спокойнее, чем в видео.", "Канал — это место, где можно делиться новостями, мыслями и тем, что не помещается в ролик. Для меня важно, что люди остаются рядом и читают, а не просто проходят мимо.", "Мне нравится, что Telegram — это живой и быстрый формат. Можно сразу рассказать о новом, поделиться планами и получить отклик.", "Каждый подписчик здесь — это человек, которому действительно интересно, что со мной происходит дальше. Я ценю это и стараюсь не пропадать надолго.", "400+ подписчиков — это не рекорд, но это люди, которые выбрали следить за моим путём. Для меня это важная часть общей картины.", "Канал помогает мне держать связь со всеми площадками сразу. Через него проще рассказать, где я выпускаю новое и что планирую делать дальше.", "Я не обещаю того, в чём не уверен, и стараюсь писать честно. Если ты хочешь быть в курсе моих новостей, заглядывай в мой Telegram."], "400+ ПОДПИСЧИКОВ"],
+      en: ["Telegram", ["I have my own Telegram channel, and it is one more part of my story. Here I can talk with my audience closer and calmer than in videos.", "The channel is a place to share news, thoughts and things that do not fit into a video. It matters to me that people stay close and read instead of just passing by.", "I like that Telegram is a quick, living format. I can share something new at once, tell my plans and get a response.", "Every subscriber here is a person who truly wants to know what happens to me next. I value that and try not to disappear for long.", "400+ subscribers is not a record, but these are people who chose to follow my path. For me it is an important part of the whole picture.", "The channel helps me keep all my platforms connected. It makes it easier to tell where I release new things and what I plan next.", "I do not promise what I am not sure about, and I try to write honestly. If you want to follow my news, visit my Telegram."], "400+ SUBSCRIBERS"]
+    }]);
+    /* ===== SECTION ORDER (first hashtag of each section). Reorder this list to reorder the site ===== */
+    const ORDER = ["ГЛАВНАЯ", "БИОГРАФИЯ", "НАЧАЛО", "ПЕРВЫЕШАГИ", "ТРУДНОСТИ", "ПЕРЕЛОМНЫЙМОМЕНТ", "UNBROKEN", "БУДУЩЕЕ", "TELEGRAM", "TIKTOK", "YOUTUBE", "TWITCH", "BRAWLSTARS", "DISCORD", "КОНТАКТЫ"];
+    S.sort((a, b) => ORDER.indexOf(a[0][0]) - ORDER.indexOf(b[0][0]));
+    /* extra images per section index (put files in images/): add your own screenshots here */
+    const MORE = { "YOUTUBE": ["youtube-channel.jpg"], "TIKTOK": ["tiktok-profile.jpg"], "BRAWLSTARS": ["brawlstars-skull.jpg"], "TELEGRAM": ["telegram-channel.jpg", "telegram-profile.jpg"] };
+
+    /* ===== LONG2 (RU): more text per section ===== */
+    const LONG2 = {
+      3: ["Каждое видео начинается с идеи, которая сначала кажется простой.", "Потом выясняется, что нужно придумать подачу, структуру и начало.", "Я стараюсь, чтобы ролик был понятным с первых секунд.", "Съёмка и запись требуют внимания к деталям.", "Монтаж часто занимает больше времени, чем ожидаешь.", "Бывает, что готовый материал приходится переделывать.", "Иногда я смотрю на результат и понимаю, что можно лучше.", "Тогда я возвращаюсь к работе, вместо того чтобы просто выпустить как есть.", "Я учусь на комментариях и на собственных ошибках.", "Некоторые замечания полезны, и я стараюсь их учитывать.", "Важно отделять критику, которая помогает, от пустых слов.", "Канал — это долгая дорога, а не быстрый старт.", "Рост редко идёт ровно: бывают подъёмы, а бывают спокойные периоды.", "В спокойные периоды особенно важно не терять мотивацию.", "Подписчик для меня — это не цифра, а живой человек.", "Он тратит время на мой ролик, и это дорогого стоит.", "Поэтому я хочу делать контент, за который не стыдно.", "Я стараюсь быть честным с аудиторией и не обещать лишнего.", "Я понимаю, что не все видео будут одинаково удачными.", "Это нормально для любого, кто делает что-то регулярно.", "Главное — делать выводы и двигаться дальше.", "Мне интересно пробовать новые форматы и подходы.", "Одни получаются лучше, другие хуже, но опыт есть в любом случае.", "Я вижу, как со временем улучшается качество моих материалов.", "Это заметно мне самому, когда я пересматриваю старые работы.", "Такой прогресс радует больше любых цифр.", "И я хочу продолжать развивать канал и делиться тем, что умею."],
+      6: ["Иногда я открываю игру без всякой цели, просто чтобы почувствовать процесс.", "Такие матчи напоминают, что я начинал не ради цифр.", "Цифры появились потом, как следствие интереса.", "Со временем игра стала частью моего контента.", "Она даёт темы для видео, для эфиров и для общения.", "Через неё я знакомился с людьми, которым это тоже интересно.", "Я заметил, что стабильность важнее редких всплесков.", "Лучше играть спокойно и регулярно, чем выжимать из себя максимум раз в месяц.", "Каждый новый персонаж и режим требуют времени, чтобы их понять.", "Сначала всё кажется непонятным и неудобным.", "Потом приходит привычка, а за ней и уверенность.", "Я стараюсь не сравнивать себя с лучшими игроками.", "Они начинали в других условиях и шли своим путём.", "Моя задача — быть лучше, чем вчера, а не быстрее всех.", "Иногда я делаю паузу, и после неё играть становится интереснее.", "Свежий взгляд помогает заметить то, что раньше ускользало.", "Поэтому для меня 100 000+ трофеев — это история терпения, а не просто красивая цифра."],
+      8: ["Я заметил, что самые тяжёлые периоды часто начинаются незаметно.", "Сначала пропадает желание делать то, что раньше приносило радость.", "Потом появляется чувство вины за то, что не успеваешь.", "Это замкнутый круг, и из него трудно выйти одному силой воли.", "Мне помогло разговаривать с близкими и признавать, что мне тяжело.", "Говорить о слабых моментах оказалось не стыдно.", "Часто люди видят только готовый результат: видео, трофеи, цифры.", "Они не видят бессонных вечеров, сомнений и отменённых планов.", "Поэтому я хочу, чтобы на этом сайте была и обратная сторона.", "Я не считаю трудности наказанием.", "Они показывают, где нужно что-то изменить: режим, цели или ожидания.", "Иногда достаточно уменьшить нагрузку, и снова становится легче.", "Иногда нужно честно сказать себе, что цель была слишком расплывчатой.", "Я учусь замечать усталость раньше, чем она станет сильной.", "Если ты читаешь это и тебе тяжело, ты не один.", "Помощь друзей, семьи или специалиста — это нормальный шаг, а не слабость."],
+      10: ["Для меня это слово стало напоминанием в трудные дни.", "Когда хочется всё бросить, я вспоминаю, сколько уже пройдено.", "Пройденный путь нельзя отменить.", "Он остаётся со мной, даже если сейчас всё идёт медленно.", "Я не считаю, что нужно всегда быть сильным.", "Быть собой, уставшим или сомневающимся, тоже нормально.", "Сила — это не отсутствие слабых моментов.", "Это умение вернуться к делу, когда стало немного легче.", "Каждый маленький шаг лучше, чем ожидание идеального момента.", "Я хочу, чтобы мой сайт показывал реальный путь, а не глянцевую картинку.", "Здесь есть и успехи, и сомнения, и паузы.", "Мои цифры скромнее, чем у больших блогеров, и я не стесняюсь этого.", "Они честные и заработаны временем и трудом.", "Если мой пример хоть кому-то поможет не остановиться, значит, всё не зря.", "Ты тоже можешь начать с малого и идти в своём темпе.", "Не нужно доказывать никому, что ты способен на большее.", "Достаточно продолжать, и со временем это станет заметно."]
+    };
+    for (const i in LONG2) S[i][4].ru[1].push(LONG2[i].join(" "));
+
+    /* ===== LONG3 (RU): more text for the remaining sections ===== */
+    const LONG3 = {
+      1: "Я часто думаю о том, как всё начиналось. Тогда я совсем не знал, куда это приведёт. У меня не было большого плана и чётких целей. Был интерес и желание попробовать. Этого оказалось достаточно, чтобы сделать первый шаг. Первые попытки были далеки от идеала. Я многого не умел и многого не понимал. Но каждая попытка чему-то меня учила. Я перестал бояться делать неидеально. Это освободило меня и позволило двигаться быстрее. Сейчас я смотрю на начало с теплотой. Оно напоминает, насколько далеко можно зайти. Если ты только начинаешь, не торопи себя. Начало всегда выглядит скромно, и это нормально.",
+      2: "Сначала я просто пробовал разные идеи и форматы. Что-то нравилось, что-то совсем не получалось. Я учился пользоваться программами и инструментами. Каждый навык давался через практику. Пришлось привыкнуть к тому, что сразу хорошо не бывает. Первые материалы редко радовали меня самого. Но я видел, как с каждым разом становится чуть лучше. Это незаметное улучшение и есть настоящий прогресс. Я начал замечать детали: звук, подачу, ритм. Раньше я не обращал на них внимания. Постепенно интерес к медиа превратился в серьёзное занятие. Я понял, что мне нравится именно процесс создания. Он держит меня даже тогда, когда нет быстрых результатов. Поэтому я продолжал работать над своими проектами.",
+      4: "Короткие видео требуют другого мышления. Здесь нужно донести мысль за несколько секунд. Это учит быть чётким и не тянуть время. Я пробовал разные идеи и смотрел на реакцию. Не всё получало отклик, и это нормально. Каждый ролик — это небольшой эксперимент. Я обращаю внимание на то, что нравится людям. Общение в комментариях помогает лучше понять аудиторию. Мне приятно, когда люди пишут и делятся мнением. Рост в TikTok бывает неравномерным. Бывают периоды, когда аккаунт почти не двигается. В такие моменты важно не бросать, а искать новые идеи. 300+ подписчиков — это результат моей работы. Я не сравниваю его с чужими цифрами. Он показывает, что я двигаюсь вперёд.",
+      5: "Прямой эфир — это особый формат. Здесь всё происходит в реальном времени. Нельзя вырезать неудачный момент и переснять. Это учит спокойно относиться к ошибкам. Во время стрима нужно одновременно играть и общаться. Сначала это кажется сложным. Со временем появляется уверенность и свой стиль. Мне нравится живая атмосфера и разговоры со зрителями. Чат превращает трансляцию в общее дело. Иногда зрители подсказывают идеи, о которых я не думал. Стрим развивает умение говорить и держать внимание. Он учит быть открытым и естественным. Постоянство здесь особенно важно. Люди приходят туда, где их ждут и где им комфортно. Я хочу постепенно строить такое сообщество.",
+      7: "Discord для меня — это место, где общение продолжается после видео. Здесь можно спокойно поговорить без спешки. Люди делятся идеями, играми и впечатлениями. Я рад, что у них есть общее пространство. Иногда в разговорах рождаются идеи для контента. Участники могут помогать друг другу советами. В игре это особенно ценно. Начинающим легче, когда рядом есть кто-то опытнее. Мне важно, чтобы здесь было дружелюбно и уважительно. Сообщество держится на людях, а не на цифрах. Каждый участник вносит что-то своё. Я хочу, чтобы здесь каждому было комфортно и интересно. Такое пространство нужно создавать постепенно. Поэтому я продолжаю развивать его шаг за шагом.",
+      9: "Перелом редко бывает громким. Чаще он незаметен и приходит постепенно. Однажды я поймал себя на мысли, что цифры больше не главное. Меня стал интересовать сам путь. Я начал ценить небольшие шаги, которые раньше казались мелочью. Трудности заставили меня задуматься, чего я на самом деле хочу. Я стал честнее с самим собой. Это помогло отказаться от лишнего давления. Я перестал требовать идеальных результатов каждый день. Вместо этого я стал смотреть на общее направление. Такой взгляд успокаивает и придаёт сил. Свет не появляется потому, что трещины исчезли. Он проходит через них и показывает, что внутри есть что-то живое. Это и стало моим поворотом.",
+      11: "Я смотрю вперёд со спокойным интересом. Мне хочется развивать свои площадки и делать их лучше. Я хочу работать над качеством видео. Это значит уделять больше внимания идеям и подаче. Я планирую продолжать учиться новому. Навыки накапливаются со временем и открывают новые возможности. Мне хочется развивать сообщество и общаться с людьми. Я хочу, чтобы им было интересно и приятно здесь находиться. Конкретных обещаний я давать не буду. Но направление для меня понятно. Я хочу расти, пробовать и не бояться ошибок. Каждый новый опыт делает меня сильнее. История продолжается, и я пишу её каждый день. Спасибо, что ты прочитал её до этого места."
+    };
+    for (const i in LONG3) S[i][4].ru[1].push(LONG3[i]);
+    /* ===== BIO section: inserted AFTER all index-based merges, becomes section #1 ===== */
+    S.splice(1, 0, [["БИОГРАФИЯ", "BIO", "ABOUT"], "bio.jpg", 0, 0, {
+      ru: ["Моя биография", ["<b>Имя:</b> Дима", "<b>Возраст:</b> 16", "<b>Место проживания:</b> Пермь", "<b>Год рождения:</b> 2010", "<b>Знак зодиака:</b> Дева", "Это то, с чего начинается моя история. Остальное я расскажу дальше."], "Всё начинается с человека."],
+      en: ["My Biography", ["<b>Name:</b> Dima", "<b>Age:</b> 16", "<b>Place of residence:</b> Perm", "<b>Year of birth:</b> 2010", "<b>Zodiac sign:</b> Virgo", "This is where my story starts. The rest I will tell next."], "Everything starts with a person."]
+    }]);
+
+    
+    const P = [["telegram", "Telegram", "T", { ru: "Новости и общение", en: "News and chat" }], ["youtube", "YouTube", "Y", { ru: "Видео и канал", en: "Videos and channel" }], ["instagram", "Instagram", "I", { ru: "Фото и истории", en: "Photos and stories" }], ["tiktok", "TikTok", "K", { ru: "Короткие видео", en: "Short videos" }], ["facebook", "Facebook", "F", { ru: "Страница автора", en: "Author page" }], ["x", "Twitter / X", "X", { ru: "Короткие мысли", en: "Short thoughts" }], ["twitch", "Twitch", "W", { ru: "Прямые эфиры", en: "Live streams" }], ["discord", "Discord", "D", { ru: "Сообщество", en: "Community" }]];
+
+    let lang = "ru"; try { lang = sessionStorage.getItem("fz-lang") || "ru" } catch (e) { }
+    const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+    const t = k => UI[lang][k];
+    const title = i => S[i][4][lang][0];
+    const pad = n => String(n + 1).padStart(2, "0");
+
+    function linkBtn(key) {
+      const u = LINKS[key], ok = !/^ВСТАВИТЬ/.test(u);
+      return `<a class="btn" href="${ok ? u : "#"}" ${ok ? 'target="_blank" rel="noopener"' : 'data-nolink="1"'}>${t("open")} ↗</a>`
+    }
+
+    function render() {
+      let h = "";
+      S.forEach((s, i) => {
+        const d = s[4][lang], ps = d[1] || [], q = d[2];
+        const pager = `<div class="pager">${i ? `<button class="btn" data-go="${i - 1}">${t("back")}</button>` : ""}${i < S.length - 1 ? `<button class="btn" data-go="${i + 1}">${t("next")}${title(i + 1)}</button>` : `<button class="btn" data-go="0">↑ ${t("toTop")}</button>`}</div>`;
+        const img = `<div class="img rv" role="img" aria-label="${d[0]}" style="background-image:url(images/${s[1]}),radial-gradient(circle at 70% 20%,#2a2f3a,#0b0c0f)"></div>`;
+        const extra = (MORE[s[0][0]] || []).map(f => `<div class="img shot rv" role="img" aria-label="${d[0]}" style="background-image:url(images/${f})"></div>`).join("");
+        if (i === 0) {
+          h += `<section class="home" id="s0"><video class="hv" src="video/cracks.mp4" autoplay muted loop playsinline aria-hidden="true"></video><svg class="hc" viewBox="0 0 200 600" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M100 0 L88 90 L112 170 L84 260 L106 340 L90 430 L100 600"/><path pathLength="1" d="M112 170 L150 210 L170 300M84 260 L40 300 L20 380"/></svg><div class="rv"><h1>FLOZY</h1><div class="sub">UNBROKEN</div><p style="margin-top:24px;font-size:1.3em">«${t("tag1")}»</p><p style="color:var(--s)">${t("tag2")}</p><button class="btn big" data-go="1">${t("start")}</button></div></section>`;
+        } else if (i === S.length - 1) {
+          h += `<section class="contacts" id="s${i}"><div class="rv"><div class="cnt">${pad(i)} / ${pad(S.length - 1)} ${s[0][0]}</div><h2>${d[0]}</h2></div><div class="cards">${P.map(p => `<div class="card rv"><div class="ic">${p[2]}</div><h3>${p[1]}</h3><p>${p[3][lang]}</p>${linkBtn(p[0])}</div>`).join("")}</div>${pager}<div class="rv"><h3 style="letter-spacing:.2em">FLOZY — UNBROKEN</h3><blockquote>«${t("end")}»</blockquote></div></section>`;
+        } else {
+          h += `<section id="s${i}"><div class="txt rv"><div class="cnt">${pad(i)} / ${pad(S.length - 1)}</div><div class="tag">#${s[0][0]}</div><h2>${d[0]}</h2>${s[3] ? `<div class="stat" data-n="${s[3]}">${s[3]}</div>` : ""}${ps.map(p => `<p>${p}</p>`).join("")}${q ? `<blockquote>«${q}»</blockquote>` : ""}${s[2] ? `<p>${linkBtn(s[2])}</p>` : ""}${pager}</div><div class="gal">${img}${extra}</div></section>`;
+        }
+      });
+      $("#main").innerHTML = h;
+      $("#nav").innerHTML = S.map((s, i) => `<a href="#s${i}" data-go="${i}">${pad(i)} · ${title(i)} <small>#${s[0][0]}</small></a>`).join("");
+      $$("[data-ui]").forEach(e => e.textContent = t(e.dataset.ui));
+      $("#q").placeholder = t("ph");
+      document.documentElement.lang = lang;
+      observe(); spy();
+    }
+
+    /* navigation */
+    function go(i, silent) { const el = $("#s" + i); if (!el) return; el.scrollIntoView({ behavior: "smooth", block: "start" }); $("#nav").classList.remove("open"); $("#menu").setAttribute("aria-expanded", "false"); if (!silent) toast(t("found") + title(i)) }
+    document.addEventListener("click", e => {
+      const g = e.target.closest("[data-go]"); if (g) { e.preventDefault(); go(+g.dataset.go, true) }
+      const n = e.target.closest("[data-nolink]"); if (n) { e.preventDefault(); toast(t("nolink")) }
+    });
+    $("#menu").onclick = () => { const o = $("#nav").classList.toggle("open"); $("#menu").setAttribute("aria-expanded", o) };
+    $("#top").onclick = () => go(0, true);
+    
+    /* hashtag search */
+    const norm = v => v.toUpperCase().replace(/\s+/g, "").replace(/^#+/, "");
+    function find(v) { v = norm(v); if (!v) return -1; return S.findIndex(s => s[0].some(a => a === v)) }
+    function suggest() {
+      const v = norm($("#q").value), ul = $("#sug");
+      const m = S.map((s, i) => [i, s[0]]).filter(([i, a]) => !v || a.some(x => x.includes(v)));
+      ul.innerHTML = m.map(([i, a]) => `<li tabindex="0" data-i="${i}">#${a[0]} — ${title(i)}</li>`).join(""); ul.style.display = m.length ? "block" : "none"
+    }
+    $("#q").addEventListener("input", suggest); $("#q").addEventListener("focus", suggest);
+    $("#sug").addEventListener("click", e => { const l = e.target.closest("li"); if (l) { $("#q").value = ""; $("#sug").style.display = "none"; go(+l.dataset.i) } });
+    $("#sug").addEventListener("keydown", e => { if (e.key === "Enter") e.target.click() });
+    document.addEventListener("click", e => { if (!e.target.closest(".search")) $("#sug").style.display = "none" });
+    $("#sf").addEventListener("submit", e => {
+      e.preventDefault(); const i = find($("#q").value);
+      if (i < 0) toast(t("notfound") + "#" + S.slice(1, 5).map(s => s[0][0]).join(", #"));
+      else { $("#q").value = ""; $("#q").blur(); $("#sug").style.display = "none"; go(i) }
+    });
+
+    /* language */
+    $("#lang").onclick = () => { lang = lang === "ru" ? "en" : "ru"; try { sessionStorage.setItem("fz-lang", lang) } catch (e) { } const y = scrollY; render(); scrollTo(0, y) };
+
+    /* toast */
+    let tt; function toast(m) { const e = $("#toast"); e.textContent = m; e.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => e.classList.remove("show"), 2400) }
+
+    /* reveal + counters */
+    let io;
+    function observe() {
+      if (io) io.disconnect();
+      io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); const c = en.target.querySelector(".stat"); if (c && !c.done) { c.done = 1; count(c) } io.unobserve(en.target) } }), { threshold: .15 });
+      $$(".rv").forEach(e => io.observe(e))
+    }
+    function count(el) {
+      const raw = el.dataset.n, num = parseInt(raw.replace(/\D/g, "")), suf = raw.replace(/[\d\s]/g, ""), sp = raw.includes(" ") ? " " : ",";
+      const fmt = n => (lang === "ru" ? n.toLocaleString("ru-RU") : n.toLocaleString("en-US")) + suf;
+      if (matchMedia("(prefers-reduced-motion:reduce)").matches) { el.textContent = fmt(num); return }
+      const st = performance.now(); (function f(now) { const p = Math.min((now - st) / 1400, 1); el.textContent = fmt(Math.round(num * (1 - Math.pow(1 - p, 3)))); if (p < 1) requestAnimationFrame(f) })(st)
+    }
+
+    /* scroll progress + active section */
+    function spy() {
+      const hs = $$("section"); const a = $$("#nav a");
+      const sc = () => {
+        const h = document.documentElement; $("#prog").style.width = (scrollY / (h.scrollHeight - innerHeight) * 100) + "%";
+        let cur = 0; hs.forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * .4) cur = i });
+        a.forEach((x, i) => x.classList.toggle("act", i === cur)); $("#top").style.display = scrollY > 600 ? "block" : "none"
+      };
+      removeEventListener("scroll", window._sc); window._sc = sc; addEventListener("scroll", sc, { passive: true }); sc()
+    }
+
+    /* music player */
+    const au = $("#au");
+    $("#play").onclick = () => { if (au.paused) { au.volume = +$("#vol").value; au.play().then(() => $("#play").innerHTML = "&#10074;&#10074;").catch(() => toast("audio/background-music.mp3 ?")) } else { au.pause(); $("#play").innerHTML = "&#9654;" } };
+    $("#vol").oninput = e => au.volume = +e.target.value;
+
+    /* particles (light, paused when hidden) */
+    (function () {
+      const c = $("#fx"), x = c.getContext("2d"); if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+      let w, h, ps = []; const rs = () => { w = c.width = innerWidth; h = c.height = innerHeight; ps = Array.from({ length: innerWidth < 800 ? 25 : 55 }, () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5 + .3, v: Math.random() * .25 + .05 })) }; rs(); addEventListener("resize", rs);
+      (function f() { x.clearRect(0, 0, w, h); x.fillStyle = "rgba(210,220,240,.5)"; ps.forEach(p => { p.y -= p.v; if (p.y < 0) p.y = h; x.beginPath(); x.arc(p.x, p.y, p.r, 0, 7); x.fill() }); if (!document.hidden) requestAnimationFrame(f); else setTimeout(f, 500) })()
+    })();
+
+    /* init + loader (always removed after 2.4s max) */
+    render();
+    const hide = () => $("#loader").classList.add("off");
+    setTimeout(hide, 2000); addEventListener("load", () => setTimeout(hide, 1800));
+  </script>
+</body>
+
+</html>
